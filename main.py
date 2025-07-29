@@ -114,12 +114,16 @@ with tab2:
 
         # Vertical Bar Chart (Altair)
         melted_df = avg_df.melt(id_vars='system', var_name='KPI', value_name='Score')
-        bar_chart = alt.Chart(melted_df).mark_bar().encode(
-            x=alt.X('system:N', title="System"),
-            y=alt.Y('Score:Q', title="Average Score"),
-            color='KPI:N',
-            column=alt.Column('KPI:N', title=None)
-        ).properties(width=100, height=300)
+    bar_chart = alt.Chart(melted_df).mark_bar().encode(
+        x=alt.X('system:N', title="System", axis=alt.Axis(labelAngle=0)),
+        y=alt.Y('Score:Q', title="Average Score"),
+        color=alt.Color('KPI:N', legend=alt.Legend(title="KPI")),
+        tooltip=['system:N', 'KPI:N', 'Score:Q']
+    ).properties(
+        width=500,
+        height=400,
+        title="Average KPI Scores by System"
+    )
 
         st.altair_chart(bar_chart, use_container_width=True)
 
