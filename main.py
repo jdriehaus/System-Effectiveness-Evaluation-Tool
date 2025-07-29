@@ -140,18 +140,18 @@ with tab2:
 
     # ---------- Export Section ----------
     
-    st.subheader("Export Evaluations")
+   # st.subheader("Export Evaluations")
 
-    export_format = st.radio("Select Export Format", ["Excel", "CSV"], horizontal=True)
+   # export_format = st.radio("Select Export Format", ["Excel", "CSV"], horizontal=True)
 
-    if export_format == "Excel":
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            filtered_df.to_excel(writer, index=False, sheet_name='Evaluations')
-        st.download_button("Download Excel File", data=output.getvalue(), file_name="evaluations.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    else:
-        csv = filtered_df.to_csv(index=False)
-        st.download_button("Download CSV File", data=csv, file_name="evaluations.csv", mime="text/csv")
+#    if export_format == "Excel":
+     #   output = io.BytesIO()
+     #   with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+       #     filtered_df.to_excel(writer, index=False, sheet_name='Evaluations')
+      #  st.download_button("Download Excel File", data=output.getvalue(), file_name="evaluations.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+#   else:
+#        csv = filtered_df.to_csv(index=False)
+     #   st.download_button("Download CSV File", data=csv, file_name="evaluations.csv", mime="text/csv")
     
     # ---------- KPI Trends ----------
     st.subheader("KPI Trends Over Time")
