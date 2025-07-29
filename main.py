@@ -135,6 +135,7 @@ with tab2:
         st.info("No recent submissions found.")
 
     # ---------- Export Section ----------
+    '''
     st.subheader("Export Evaluations")
 
     export_format = st.radio("Select Export Format", ["Excel", "CSV"], horizontal=True)
@@ -147,7 +148,7 @@ with tab2:
     else:
         csv = filtered_df.to_csv(index=False)
         st.download_button("Download CSV File", data=csv, file_name="evaluations.csv", mime="text/csv")
-
+    '''
     # ---------- KPI Trends ----------
     st.subheader("KPI Trends Over Time")
 
