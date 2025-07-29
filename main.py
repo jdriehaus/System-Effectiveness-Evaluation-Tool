@@ -1,7 +1,9 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import altair as alt
 from datetime import datetime
+import io
 
 # ---------- DATABASE SETUP ----------
 def init_db():
@@ -33,30 +35,6 @@ def insert_evaluation(system, department, usability, integration, support, custo
     conn.commit()
     conn.close()
 
-def get_averages():
-    conn = sqlite3.connect('evaluations.db')
-    df = pd.read_sql_query('''
-        SELECT system, 
-               ROUND(AVG(usability),2) AS usability,
-               ROUND(AVG(integration),2) AS integration,
-               ROUND(AVG(support),2) AS support,
-               ROUND(AVG(customization),2) AS customization
-        FROM evaluations
-        GROUP BY system
-    ''', conn)
-    conn.close()
-    return df
-
-def get_recent_feedback(n=10):
-    conn = sqlite3.connect('evaluations.db')
-    df = pd.read_sql_query(f'''
-        SELECT * FROM evaluations
-        ORDER BY timestamp DESC
-        LIMIT {n}
-    ''', conn)
-    conn.close()
-    return df
-
 def get_filtered_data(system_filter=None, dept_filter=None, days_filter=None):
     conn = sqlite3.connect('evaluations.db')
     df = pd.read_sql_query('SELECT * FROM evaluations', conn, parse_dates=["timestamp"])
@@ -80,7 +58,7 @@ init_db()
 
 st.title("System Effectiveness Evaluation Tool")
 
-# TABS
+# Tabs
 tab1, tab2 = st.tabs(["Submit Evaluation", "Dashboard"])
 
 # ---------- TAB 1: Evaluation Form ----------
@@ -134,23 +112,17 @@ with tab2:
 
         st.dataframe(avg_df)
 
-        import altair as alt
+        # Vertical Bar Chart (Altair)
+        melted_df = avg_df.melt(id_vars='system', var_name='KPI', value_name='Score')
+        bar_chart = alt.Chart(melted_df).mark_bar().encode(
+            x=alt.X('system:N', title="System"),
+            y=alt.Y('Score:Q', title="Average Score"),
+            color='KPI:N',
+            column=alt.Column('KPI:N', title=None)
+        ).properties(width=100, height=300)
 
-# Melt the DataFrame for Altair
-avg_melted = avg_df.melt(id_vars='system', 
-                         value_vars=['usability', 'integration', 'support', 'customization'],
-                         var_name='KPI',
-                         value_name='Score')
+        st.altair_chart(bar_chart, use_container_width=True)
 
-# Create vertical grouped bar chart
-chart = alt.Chart(avg_melted).mark_bar().encode(
-    x=alt.X('system:N', title='System'),
-    y=alt.Y('Score:Q', title='Average Score'),
-    color='KPI:N',
-    column=alt.Column('KPI:N', title=None)
-).properties(width=100, height=300)
-
-st.altair_chart(chart, use_container_width=True)
     else:
         st.warning("No data to display for selected filters.")
 
@@ -162,3 +134,32 @@ st.altair_chart(chart, use_container_width=True)
     else:
         st.info("No recent submissions found.")
 
+    # ---------- Export Section ----------
+    st.subheader("Export Evaluations")
+
+    export_format = st.radio("Select Export Format", ["Excel", "CSV"], horizontal=True)
+
+    if export_format == "Excel":
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            filtered_df.to_excel(writer, index=False, sheet_name='Evaluations')
+        st.download_button("Download Excel File", data=output.getvalue(), file_name="evaluations.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    else:
+        csv = filtered_df.to_csv(index=False)
+        st.download_button("Download CSV File", data=csv, file_name="evaluations.csv", mime="text/csv")
+
+    # ---------- KPI Trends ----------
+    st.subheader("KPI Trends Over Time")
+
+    kpi_to_chart = st.selectbox("Select KPI to view trend", ["usability", "integration", "support", "customization"])
+    if not filtered_df.empty:
+        trend_df = filtered_df[['timestamp', 'system', kpi_to_chart]]
+        trend_chart = alt.Chart(trend_df).mark_line(point=True).encode(
+            x='timestamp:T',
+            y=alt.Y(f'{kpi_to_chart}:Q', title=kpi_to_chart.capitalize()),
+            color='system:N'
+        ).properties(height=400)
+
+        st.altair_chart(trend_chart, use_container_width=True)
+    else:
+        st.info("Not enough data to show trend.")
