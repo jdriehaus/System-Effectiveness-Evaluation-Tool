@@ -110,7 +110,7 @@ with tab1:
 with tab2:
     st.header("System Evaluation Dashboard")
 
-    st.subheader("📌 Filter Options")
+    st.subheader("Filter Options")
     col1, col2, col3 = st.columns(3)
     with col1:
         system_filter = st.selectbox("Filter by System", ["All", "Nulogy", "NetSuite", "UKG", "Workato"])
