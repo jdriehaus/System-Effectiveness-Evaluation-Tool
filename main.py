@@ -134,7 +134,23 @@ with tab2:
 
         st.dataframe(avg_df)
 
-        st.bar_chart(avg_df.set_index('system'))
+        import altair as alt
+
+# Melt the DataFrame for Altair
+avg_melted = avg_df.melt(id_vars='system', 
+                         value_vars=['usability', 'integration', 'support', 'customization'],
+                         var_name='KPI',
+                         value_name='Score')
+
+# Create vertical grouped bar chart
+chart = alt.Chart(avg_melted).mark_bar().encode(
+    x=alt.X('system:N', title='System'),
+    y=alt.Y('Score:Q', title='Average Score'),
+    color='KPI:N',
+    column=alt.Column('KPI:N', title=None)
+).properties(width=100, height=300)
+
+st.altair_chart(chart, use_container_width=True)
     else:
         st.warning("No data to display for selected filters.")
 
