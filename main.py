@@ -229,3 +229,16 @@ with tab2:
         st.altair_chart(chart, use_container_width=True)
     else:
         st.info("Not enough data to show trend.")
+
+        st.subheader("🧹 Reset Application")
+
+    with st.expander("⚠️ Admin Reset Controls"):
+        if st.checkbox("Yes, I understand this will delete all evaluations."):
+            if st.button("Clear All Evaluations (Irreversible)", type="primary"):
+                conn = sqlite3.connect('evaluations.db')
+                c = conn.cursor()
+                c.execute("DELETE FROM evaluations")
+                conn.commit()
+                conn.close()
+                st.success("✅ All evaluation data has been cleared.")
+
