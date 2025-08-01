@@ -10,9 +10,8 @@ def init_db():
     conn = sqlite3.connect('evaluations.db')
     c = conn.cursor()
 
-    # Drop the old table if it exists — only use during development!
-    c.execute('DROP TABLE IF EXISTS evaluations')
-
+    # ✅ DO NOT drop the table — preserve existing data
+    # ✅ Add missing columns if they don't exist (safe for production)
     c.execute('''
         CREATE TABLE IF NOT EXISTS evaluations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,8 +27,21 @@ def init_db():
             comments TEXT
         )
     ''')
+
+    # Optional: Add columns if they didn't exist before
+    try:
+        c.execute("ALTER TABLE evaluations ADD COLUMN system_area TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists, no problem
+
+    try:
+        c.execute("ALTER TABLE evaluations ADD COLUMN custom_system TEXT")
+    except sqlite3.OperationalError:
+        pass
+
     conn.commit()
     conn.close()
+
 
 
 def insert_evaluation(system, custom_system, department, system_area,
