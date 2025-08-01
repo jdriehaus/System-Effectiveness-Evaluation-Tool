@@ -32,14 +32,14 @@ def insert_evaluation(system, custom_system, department, system_area,
     conn = sqlite3.connect('evaluations.db')
     c = conn.cursor()
     c.execute('''
-        INSERT INTO evaluations (
-            timestamp, system, custom_system, department, system_area,
-            usability, integration, support, customization, comments
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        datetime.now().isoformat(), system, custom_system, department, system_area,
+    INSERT INTO evaluations (
+        timestamp, system, custom_system, department, system_area,
         usability, integration, support, customization, comments
-    ))
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+''', (
+    datetime.now().isoformat(), system, custom_system, department, system_area,
+    usability, integration, support, customization, comments
+))
     conn.commit()
     conn.close()
 
