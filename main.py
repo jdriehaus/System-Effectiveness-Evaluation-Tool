@@ -9,6 +9,10 @@ import io
 def init_db():
     conn = sqlite3.connect('evaluations.db')
     c = conn.cursor()
+
+    # Drop the old table if it exists — only use during development!
+    c.execute('DROP TABLE IF EXISTS evaluations')
+
     c.execute('''
         CREATE TABLE IF NOT EXISTS evaluations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +30,7 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
+
 
 def insert_evaluation(system, custom_system, department, system_area,
                       usability, integration, support, customization, comments):
